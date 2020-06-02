@@ -280,14 +280,14 @@ class LabelEmbedModel(nn.Module):
         self.dropout = nn.Dropout(dropout_p)
         self.e = nn.Embedding(
                     n_labels, emb_dim,
-                    max_norm=1.0,
+                    # max_norm=1.0,
                     # sparse=True,
                     scale_grad_by_freq=False
                 )
         self.init_weights()
 
     def init_weights(self, scale=1e-4):
-        self.e.state_dict()['weight'].uniform_(-scale, scale)
+        torch.nn.init.eye_(self.e.weight)
 
     def forward(self, x):
         """
