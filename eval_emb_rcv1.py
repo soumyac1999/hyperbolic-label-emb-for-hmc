@@ -103,7 +103,7 @@ for j in range(1,num_nndcg_k):
 
 
 
-emb = torch.load(f'rcv1_exp/only_label_emb/29')['label_embs']
+emb = torch.load(f'rcv1_exp/cascaded_textcnn/27')['label_embs']
 emb = emb/(1+torch.sqrt(1+emb.norm(dim=-1, keepdim=True)**2))
 emb = emb.detach().cpu()
 
@@ -122,13 +122,14 @@ for j in range(1,num_nndcg_k):
 
 print(flat,jt,jt01,lab)
 import matplotlib.pyplot as plt
-plt.plot(np.arange(1,num_nndcg_k), flat, label="HIDDEN_flt")
+# plt.plot(np.arange(1,num_nndcg_k), flat, label="HIDDEN_flt")
 plt.plot(np.arange(1,num_nndcg_k), jt, label="HIDDEN_jnt 0.1")
 plt.plot(np.arange(1,num_nndcg_k), jt01, label="HIDDEN_jnt 0.01")
 plt.plot(np.arange(1,num_nndcg_k), lab, label="HIDDEN_cas")
-plt.xlabel("k")
-plt.ylabel("NDCG")
+plt.xlabel("k", fontsize=18)
+plt.ylabel("NDCG", fontsize=18)
+plt.title("a) RCV1", fontsize=18)
 plt.xticks([1,2,3,4,5])
 
 plt.legend()
-plt.savefig('rcv1_emb.png')
+plt.savefig('rcv2_emb.png')

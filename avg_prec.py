@@ -30,14 +30,16 @@ def dcg_score(y_true, y_score, k=10, gains="exponential"):
     elif gains == "linear":
         gains = y_true
     elif gains == "hops":
-    	gains = 15-y_true
+    	gains = y_true
         # gains = np.log(1/y_true)
         # print(gains)
     else:
         raise ValueError("Invalid gains option.")
 
     # highest rank is 1 so +2 instead of +1
-    discounts = np.log2(np.arange(len(y_true)) + 2)
+    #discounts = np.log2(np.arange(len(y_true)) + 2)
+    discounts= np.arange(2 ,len(y_true)+2)
+    #print('discounts ', discounts)
     # discounts = np.arange(len(y_true)) + 2
     # print('np.sum(gains / discounts) ', np.sum(gains / discounts))
     # print(gains, discounts)
@@ -67,5 +69,6 @@ def ndcg_score(y_true, y_score, k=10, gains="exponential"):
     """
     best = dcg_score(y_true, y_true, k, gains)
     actual = dcg_score(y_true, y_score, k, gains)
+#    print(actual, best)
     return actual / best
 

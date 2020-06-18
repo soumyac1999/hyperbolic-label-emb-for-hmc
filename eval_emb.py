@@ -41,8 +41,8 @@ except:
 
 	np.save('nyt/hops', hops)
 
-from_num_ndcg_k = 2
-to_num_ndcg_k = 5
+from_num_ndcg_k = 1
+to_num_ndcg_k = 6
 
 #rcv-17,8,14,29
 #nyt - 2,2 4,2
@@ -60,7 +60,7 @@ flat = []
 for j in range(from_num_ndcg_k, to_num_ndcg_k):
 	x=0
 	for i in range(n_labels):
-		x += dcg_score(hops[i,:], pred[i,:].numpy(),k=j)
+		x += ndcg_score(hops[i,:], pred[i,:].numpy(),k=j,gains="hops")
 	flat.append(x/n_labels)
 
 print(flat)
@@ -81,7 +81,7 @@ jt = []
 for j in range(from_num_ndcg_k, to_num_ndcg_k):
 	x=0
 	for i in range(n_labels):
-		x += dcg_score(hops[i,:], pred[i,:].numpy(),k=j)
+		x += ndcg_score(hops[i,:], pred[i,:].numpy(),k=j,gains="hops")
 	jt.append(x/n_labels)
 
 print(jt)
@@ -99,12 +99,12 @@ jt01 = []
 for j in range(from_num_ndcg_k, to_num_ndcg_k):
 	x=0
 	for i in range(n_labels):
-		x += dcg_score(hops[i,:], pred[i,:].numpy(),k=j)
+		x += ndcg_score(hops[i,:], pred[i,:].numpy(),k=j,gains="hops")
 	jt01.append(x/n_labels)
 
 print(jt01)
 
-emb = torch.load(f'nyt_exp/only_label_emb/23')['label_embs']
+emb = torch.load(f'nyt_exp/cascaded_textcnn/27')['label_embs']
 emb = emb/(1+torch.sqrt(1+emb.norm(dim=-1, keepdim=True)**2))
 emb = emb.detach().cpu()
 
@@ -118,14 +118,21 @@ lab = []
 for j in range(from_num_ndcg_k, to_num_ndcg_k):
 	x=0
 	for i in range(n_labels):
-		x += dcg_score(hops[i,:], pred[i,:].numpy(),k=j)
+		x += ndcg_score(hops[i,:], pred[i,:].numpy(),k=j,gains="hops")
 	lab.append(x/n_labels)
 print(lab)
 # print(flat,jt,jt01,lab)
-# import matplotlib.pyplot as plt
-# plt.plot(np.arange(1,num_ndcg_k), flat, label="Flat")
-# plt.plot(np.arange(1,num_ndcg_k), jt, label="Ours 0.1")
-# plt.plot(np.arange(1,num_ndcg_k), jt01, label="Ours 0.01")
-# plt.plot(np.arange(1,num_ndcg_k), lab, label="Only Label")
-# plt.legend()
-# plt.savefig('nyt_emb.png')
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+plt.plot(np.arange(1,to_num_ndcg_k), jt, label="HIDDEN_jnt 0.1")
+plt.plot(np.arange(1,to_num_ndcg_k), jt01, label="HIDDEN_jnt 0.01")
+plt.plot(np.arange(1,to_num_ndcg_k), lab, label="HIDDEN_cas")
+plt.xlabel("k",fontsize=18)
+plt.ylabel("NDCG",fontsize=18)
+plt.title("b) NYTimes",fontsize=18)
+plt.xticks([1,2,3,4,5])
+plt.legend()
+
+plt.savefig('nyt_emb.png')

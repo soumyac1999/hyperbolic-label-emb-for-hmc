@@ -61,7 +61,7 @@ from avg_prec import dcg_score
 for j in range(1,num_ndcg_k):
 	x=0
 	for i in range(n_labels):
-		x += dcg_score(hops[:,i], pred[:,i].numpy(),k=j, gains="hops")
+		x += ndcg_score(hops[:,i], pred[:,i].numpy(),k=j, gains="hops")
 	flat.append(x/n_labels)
 
 
@@ -82,7 +82,7 @@ jt = []
 for j in range(1,num_ndcg_k):
 	x=0
 	for i in range(n_labels):
-		x += dcg_score(hops[:,i], pred[:,i].numpy(),k=j, gains="hops")
+		x += ndcg_score(hops[:,i], pred[:,i].numpy(),k=j, gains="hops")
 	jt.append(x/n_labels)
 
 
@@ -100,7 +100,7 @@ jt01 = []
 for j in range(1,num_ndcg_k):
 	x=0
 	for i in range(n_labels):
-		x += dcg_score(hops[:,i], pred[:,i].numpy(),k=j, gains="hops")
+		x += ndcg_score(hops[:,i], pred[:,i].numpy(),k=j, gains="hops")
 	jt01.append(x/n_labels)
 
 
@@ -119,14 +119,19 @@ lab = []
 for j in range(1,num_ndcg_k):
 	x=0
 	for i in range(n_labels):
-		x += dcg_score(hops[:,i], pred[:,i].numpy(),k=j, gains="hops")
+		x += ndcg_score(hops[:,i], pred[:,i].numpy(),k=j, gains="hops")
 	lab.append(x/n_labels)
 
 print(flat,jt,jt01,lab)
-# import matplotlib.pyplot as plt
-# plt.plot(np.arange(1,num_ndcg_k), flat, label="Flat")
-# plt.plot(np.arange(1,num_ndcg_k), jt, label="Ours 0.1")
-# plt.plot(np.arange(1,num_ndcg_k), jt01, label="Ours 0.01")
-# plt.plot(np.arange(1,num_ndcg_k), lab, label="Only Label")
-# plt.legend()
-# plt.savefig('yelp_emb.png')
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+plt.plot(np.arange(1,num_ndcg_k), jt, label="HIDDEN_jnt 0.1")
+plt.plot(np.arange(1,num_ndcg_k), jt01, label="HIDDEN_jnt 0.01")
+plt.plot(np.arange(1,num_ndcg_k), lab, label="HIDDEN_cas")
+plt.xlabel("k")
+plt.ylabel("NDCG")
+plt.xticks([1,2,3,4,5])
+plt.legend()
+plt.savefig('yelp_emb.png')
