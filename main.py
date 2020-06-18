@@ -8,6 +8,7 @@ import torch.nn.functional as F
 import pickle
 import numpy as np
 import os
+import logging
 
 from datasets import TextLabelDataset
 from models import LabelEmbedModel, TextRCNN, TextCNN
@@ -49,11 +50,10 @@ class Loss(nn.Module):
 
         loss = self.bce(outputs, targets)
         if loss < 0:
-            print(outputs, targets)
+            logging.error(outputs, targets)
             raise AssertionError
         if self.use_geodesic:
             loss1 = self.geo_loss(label_embs)
-            # print(loss.item(), loss1.item())
             loss += self._lambda * loss1
         return loss
 
@@ -74,7 +74,7 @@ def train_epoch(doc_model, label_model, trainloader, criterion, optimizer, Y):
         optimizer.step()
 
         losses.append(loss.item())
-    print(f"\tTrain Loss {sum(losses)/len(losses):.6f}")
+    logging.info(f"\tTrain Loss {sum(losses)/len(losses):.6f}")
 
 
 def eval(doc_model, label_model, dataloader, mode, Y):
@@ -102,7 +102,7 @@ def eval(doc_model, label_model, dataloader, mode, Y):
     macro_p = tp / (tp + fp + eps)
     macro_r = tp / (tp + fn + eps)
     macro_f = (2 * macro_p * macro_r / (macro_p + macro_r + eps)).mean()
-    print(f"\t{mode}: {micro_f.item():.4f}, {macro_f.item():.4f}")
+    logging.info(f"\t{mode}: {micro_f.item():.4f}, {macro_f.item():.4f}")
     return micro_f.item(), macro_f.item()
 
 
@@ -114,7 +114,7 @@ def train(
     bests = {"micro": (0, 0, 0), "macro": (0, 0, 0)}  # micro, macro, epoch
     test_f = []
     for epoch in range(epochs):
-        print(f"Epoch {epoch+1}/{epochs}")
+        logging.info(f"Epoch {epoch+1}/{epochs}")
         label_model = label_model.train()
         doc_model = doc_model.train()
         train_epoch(doc_model, label_model, trainloader, criterion, optimizer, Y)
@@ -139,7 +139,7 @@ def train(
             'label_embs': label_model(Y),
             }, save_folder+'/'+str(epoch))
     best_test = {'micro': test_f[bests['micro'][2]-1], 'macro': test_f[bests['macro'][2]-1]}
-    print(best_test)
+    logging.info(best_test)
 
 
 if __name__ == "__main__":
@@ -151,39 +151,29 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--exp_name', required=True)
+    parser.add_argument('--flat', default=False, action='store_true')
+    parser.add_argument('--cascaded_step1', default=False, action='store_true')
+    parser.add_argument('--cascaded_step2', default=False, action='store_true')
+    parser.add_argument('--joint', default=False, action='store_true')
+    parser.add_argument('--pretrained_label_model', default=None)
     parser.add_argument('--dataset', default='rcv1', choices=['rcv1', 'nyt', 'yelp'])
     parser.add_argument('--base_model', default='textcnn', choices=['textcnn', 'textrcnn'])#, 'ohcnn', 'han'])
-    # parser.add_argument('--train_batch_size', type=int)
     parser.add_argument('--num_epochs', default=30, type=int)
-    parser.add_argument('--use_gt_hier', default=False, action='store_true')
-    parser.add_argument('--only_label_emb', default=False, action='store_true')
-    # parser.add_argument('--doc_dropout', type=float)
-    # parser.add_argument('--lab_dropout', type=float)
-    parser.add_argument('--use_geodesic', default=False, action='store_true')
     parser.add_argument('--geodesic_lambda', default=0.1, type=float)
     args = parser.parse_args()
 
-    print(args)
-
     os.makedirs(args.exp_name, exist_ok=True)
 
+    logging.basicConfig(filename=args.exp_name+'/res.txt', level=logging.DEBUG)
+    logging.info(args)
+
     # Datasets and Dataloaders
-    if args.use_gt_hier:
-        hier_file = f"{args.dataset}/{args.dataset}.taxonomy"
-        try:
-            trainvalset = pickle.load(open(f"{args.dataset}/train_skyline.pkl", "rb"))
-        except:
-            # json_data_file, label_file, vocab_dict=None, n_tokens=256, nnegs=5
-            trainvalset = TextLabelDataset(f"{args.dataset}/{args.dataset}_train.json", f"{args.dataset}/{args.dataset}_labels.txt", None, 256, 5, hier_file)
-            pickle.dump(trainvalset, open(f"{args.dataset}/train_skyline.pkl", "wb"))
-    else:
-        hier_file = None
-        try:
-            trainvalset = pickle.load(open(f"{args.dataset}/train.pkl", "rb"))
-        except:
-            # json_data_file, label_file, vocab_dict=None, n_tokens=256, nnegs=5
-            trainvalset = TextLabelDataset(f"{args.dataset}/{args.dataset}_train.json", f"{args.dataset}/{args.dataset}_labels.txt", None, 256, 5)
-            pickle.dump(trainvalset, open(f"{args.dataset}/train.pkl", "wb"))
+    try:
+        trainvalset = pickle.load(open(f"{args.dataset}/train.pkl", "rb"))
+    except:
+        # json_data_file, label_file, vocab_dict=None, n_tokens=256, nnegs=5
+        trainvalset = TextLabelDataset(f"{args.dataset}/{args.dataset}_train.json", f"{args.dataset}/{args.dataset}_labels.txt", None, 256, 5)
+        pickle.dump(trainvalset, open(f"{args.dataset}/train.pkl", "wb"))
 
     # Split into train and val sets
     trainset, valset = torch.utils.data.dataset.random_split(trainvalset, 
@@ -201,18 +191,11 @@ if __name__ == "__main__":
     valloader = DataLoader(
         valset, batch_size=1024, shuffle=False, num_workers=16, pin_memory=True)
 
-    if args.use_gt_hier:
-        try:
-            testset = pickle.load(open(f"{args.dataset}/test_skyline.pkl", "rb"))
-        except:
-            testset = TextLabelDataset(f"{args.dataset}/{args.dataset}_test.json", f"{args.dataset}/{args.dataset}_labels.txt", trainvalset.text_dataset.vocab, 256)
-            pickle.dump(testset, open(f"{args.dataset}/test_skyline.pkl", "wb"))
-    else:
-        try:
-            testset = pickle.load(open(f"{args.dataset}/test.pkl", "rb"))
-        except:
-            testset = TextLabelDataset(f"{args.dataset}/{args.dataset}_test.json", f"{args.dataset}/{args.dataset}_labels.txt", trainvalset.text_dataset.vocab, 256)
-            pickle.dump(testset, open(f"{args.dataset}/test.pkl", "wb"))
+    try:
+        testset = pickle.load(open(f"{args.dataset}/test.pkl", "rb"))
+    except:
+        testset = TextLabelDataset(f"{args.dataset}/{args.dataset}_test.json", f"{args.dataset}/{args.dataset}_labels.txt", trainvalset.text_dataset.vocab, 256)
+        pickle.dump(testset, open(f"{args.dataset}/test.pkl", "wb"))
 
     testloader = DataLoader(
         testset, batch_size=1024, shuffle=False, num_workers=16, pin_memory=True
@@ -220,7 +203,10 @@ if __name__ == "__main__":
 
 
     glove_file = "GloVe/glove.6B.300d.txt"
-    emb_dim = 300  # Document and label embed length
+    if not args.flat:
+        emb_dim = 300  # Document and label embed length
+    else:
+        emb_dim = trainvalset.n_labels
     word_embed_dim = 300
 
 
@@ -234,7 +220,7 @@ if __name__ == "__main__":
             word_embed_dim=word_embed_dim,
         )
         doc_lr = 0.001
-        label_model = LabelEmbedModel(trainvalset.n_labels, emb_dim=emb_dim, dropout_p=0.6)
+        label_model = LabelEmbedModel(trainvalset.n_labels, emb_dim=emb_dim, dropout_p=0.6, eye=args.flat)
     elif args.base_model=='textrcnn':
         doc_model = TextRCNN(
             trainvalset.text_dataset.vocab,
@@ -244,8 +230,15 @@ if __name__ == "__main__":
             word_embed_dim=word_embed_dim,
         )
         doc_lr = 0.003
-        label_model = LabelEmbedModel(trainvalset.n_labels, emb_dim=emb_dim, dropout_p=0.1)
+        label_model = LabelEmbedModel(trainvalset.n_labels, emb_dim=emb_dim, dropout_p=0.1, eye=args.flat)
 
+    if args.cascaded_step2:
+        label_model_pretrained = torch.load(args.pretrained_label_model)['label_model']
+        label_model.load_state_dict(label_model_pretrained)
+
+    if args.flat or args.cascaded_step2:
+        for param in label_model.parameters():
+            param.require_grad = False
 
     doc_model = nn.DataParallel(doc_model)
     label_model = nn.DataParallel(label_model)
@@ -255,7 +248,7 @@ if __name__ == "__main__":
 
     # Loss and optimizer
     criterion = Loss(
-        use_geodesic=args.use_geodesic, _lambda=args.geodesic_lambda, only_label=args.only_label_emb
+        use_geodesic=args.joint, _lambda=args.geodesic_lambda, only_label=args.cascaded_step1
     )
 
     optimizer = torch.optim.Adam([
@@ -264,7 +257,7 @@ if __name__ == "__main__":
     ])
 
 
-    print('Starting Training')
+    logging.info('Starting Training')
     # Train and evaluate
     Y = torch.arange(trainvalset.n_labels).cuda()
     train(
