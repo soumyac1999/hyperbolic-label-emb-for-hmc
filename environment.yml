@@ -1,4 +1,4 @@
-name: pytorch-1.14
+name: pytorch-1.4
 channels:
   - pytorch
   - defaults
