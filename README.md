@@ -1,8 +1,5 @@
 # Joint Learning of Hyperbolic Label Embeddings for Hierarchical Multi-label Classification
 
-> [Joint Learning of Hyperbolic Label Embeddings for Hierarchical Multi-label Classification]()  
-> Soumya Chatterjee, Ayush Maheshwari, Saketha Nath Jagaralpudi and Ganesh Ramakrishnan
-
 ## Abstract
 
 We consider the problem of multi-label classification, where the labels lie on a hierarchy. However, unlike most existing works in hierarchical multi-label classification, we do not assume that the label-hierarchy is known. Encouraged by the recent success of hyperbolic embeddings in capturing hierarchical relations, we propose to jointly learn the classifier parameters as well as the hyperbolic label embeddings. Such a joint learning is expected to provide a two-fold advantage: i) the classifier generalises better as it leverages the prior knowledge of existence of a hierarchy over the labels, and ii) in addition to the label cooccurrence information, the label-embedding may benefit from the manifold structure of the input datapoints, leading to embeddings that are more faithful to the label hierarchy.
@@ -35,8 +32,3 @@ For examples, please refer `Synthetic/all_expts.sh`.
 - [NeuralNLP-NeuralClassifier](https://github.com/Tencent/NeuralNLP-NeuralClassifier) for TextRCNN model
 - `bert-base-uncased-vocab.txt` is from [Hugging Face Tokenizers](https://github.com/huggingface/tokenizers)
 
-## Cite
-
-```
-Coming Soon
-```
