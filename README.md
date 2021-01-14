@@ -1,7 +1,7 @@
 ## Joint Learning of Hyperbolic Label Embeddings for Hierarchical Multi-label Classification
 
 > [Joint Learning of Hyperbolic Label Embeddings for Hierarchical Multi-label Classification]()  
-> Soumya Chatterjee, Ayush Maheshwari, Ganesh Ramakrishnan and Saketha Nath Jagaralpudi  
+> Soumya Chatterjee*, Ayush Maheshwari*, Ganesh Ramakrishnan and Saketha Nath Jagaralpudi  
 > To Appear at European Chapter of the Association for Computational Linguistics (__EACL__) 2021
 
 ### Requirements
