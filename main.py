@@ -1,17 +1,13 @@
-import json
 from tqdm import tqdm
 import torch
 import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader
-from tokenizers import BertWordPieceTokenizer
-import torch.nn.functional as F
+from torch.utils.data import DataLoader
 import pickle
-import numpy as np
 import os
 import logging
 
 from datasets import TextLabelDataset
-from models import LabelEmbedModel, TextRCNN, TextCNN
+from models import LabelEmbedModel, TextCNN
 from poincare_utils import PoincareDistance
 
 class LabelLoss(nn.Module):
@@ -157,7 +153,6 @@ if __name__ == "__main__":
     parser.add_argument('--joint', default=False, action='store_true')
     parser.add_argument('--pretrained_label_model', default=None)
     parser.add_argument('--dataset', default='rcv1', choices=['rcv1', 'nyt', 'yelp'])
-    parser.add_argument('--base_model', default='textcnn', choices=['textcnn', 'textrcnn'])#, 'ohcnn', 'han'])
     parser.add_argument('--num_epochs', default=30, type=int)
     parser.add_argument('--geodesic_lambda', default=0.1, type=float)
     args = parser.parse_args()
@@ -210,27 +205,16 @@ if __name__ == "__main__":
     word_embed_dim = 300
 
 
-    # Models
-    if args.base_model=='textcnn':
-        doc_model = TextCNN(
-            trainvalset.text_dataset.vocab,
-            glove_file=glove_file,
-            emb_dim=emb_dim,
-            dropout_p=0.1,
-            word_embed_dim=word_embed_dim,
-        )
-        doc_lr = 0.001
-        label_model = LabelEmbedModel(trainvalset.n_labels, emb_dim=emb_dim, dropout_p=0.6, eye=args.flat)
-    elif args.base_model=='textrcnn':
-        doc_model = TextRCNN(
-            trainvalset.text_dataset.vocab,
-            glove_file=glove_file,
-            emb_dim=emb_dim,
-            dropout_p=0.1,
-            word_embed_dim=word_embed_dim,
-        )
-        doc_lr = 0.003
-        label_model = LabelEmbedModel(trainvalset.n_labels, emb_dim=emb_dim, dropout_p=0.1, eye=args.flat)
+    # Model
+    doc_model = TextCNN(
+        trainvalset.text_dataset.vocab,
+        glove_file=glove_file,
+        emb_dim=emb_dim,
+        dropout_p=0.1,
+        word_embed_dim=word_embed_dim,
+    )
+    doc_lr = 0.001
+    label_model = LabelEmbedModel(trainvalset.n_labels, emb_dim=emb_dim, dropout_p=0.6, eye=args.flat)
 
     if args.cascaded_step2:
         label_model_pretrained = torch.load(args.pretrained_label_model)['label_model']

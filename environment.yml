@@ -1,4 +1,4 @@
-name: pytorch-1.4
+name: hidden-hmc
 channels:
   - pytorch
   - defaults

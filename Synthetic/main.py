@@ -16,7 +16,6 @@ class LabelDataset(Dataset):
     def __init__(self, N, nnegs=5):
         super(LabelDataset, self).__init__()
         self.items = N.shape[0]
-        # TODO: Check if N[i. j] != 0
         self.len = N.shape[0]*N.shape[0]
         self.N = N
         self.nnegs = nnegs
@@ -30,7 +29,6 @@ class LabelDataset(Dataset):
         t = idx//self.items
         h = idx%self.items
         negs = np.arange(self.items)[self.N[t][h] == 1.0]
-        # Very bad sampling method (TODO: fix)
         negs = negs.repeat(self.nnegs)
         np.random.shuffle(negs)
         return torch.tensor([t, h, *negs[:self.nnegs]])

@@ -6,7 +6,6 @@ import random
 
 MAX_DEPTH = 3
 
-# Ignore extra Root added by me
 MAX_DEPTH += 1
 
 random.seed(42)

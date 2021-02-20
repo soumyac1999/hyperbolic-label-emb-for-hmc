@@ -38,7 +38,6 @@ def read_rcv1():
             child = line[start:end]
             start = line.find('child-description: ') + len('child-description: ')
             end = line.find('\n', start)
-            child_desc = line[start:end]
             p2c[parent].append(child)
     for label in p2c:
         if label == 'None':
