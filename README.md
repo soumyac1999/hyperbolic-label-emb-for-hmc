@@ -27,7 +27,6 @@ For examples, please refer `Synthetic/all_expts.sh`.
 
 - [HiLAP](https://github.com/morningmoni/HiLAP) for data processing and TextCNN model
 - [Poincare Embeddings](https://github.com/facebookresearch/poincare-embeddings) for Poincare utils
-- [NeuralNLP-NeuralClassifier](https://github.com/Tencent/NeuralNLP-NeuralClassifier) for TextRCNN model
 - `bert-base-uncased-vocab.txt` is from [Hugging Face Tokenizers](https://github.com/huggingface/tokenizers)
 
 ### Citation:
