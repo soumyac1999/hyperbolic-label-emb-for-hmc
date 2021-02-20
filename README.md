@@ -19,7 +19,7 @@ Run `main.py` using the arguments `--exp_name`<br>
 &emsp;`--cascaded_step1` and `--cascaded_step2` for `Model_cas`<br> 
 &emsp;`--joint` for `Model_jnt`
 
-Specify the dataset using `--dataset` and the base text classification model using `--base_model`.
+Specify the dataset using `--dataset`
 
 For examples, please refer `Synthetic/all_expts.sh`.
 
