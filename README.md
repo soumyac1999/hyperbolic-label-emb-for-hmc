@@ -31,17 +31,14 @@ For examples, please refer `Synthetic/all_expts.sh`.
 
 ### Citation:
 
-```
-EACL Version coming soon
-```
-
 ```bibtex
-@misc{chatterjee2021joint,
-      title={Joint Learning of Hyperbolic Label Embeddings for Hierarchical Multi-label Classification}, 
-      author={Soumya Chatterjee and Ayush Maheshwari and Ganesh Ramakrishnan and Saketha Nath Jagaralpudi},
-      year={2021},
-      eprint={2101.04997},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
+@inproceedings{chatterjee-etal-2021-joint,
+    title = "Joint Learning of Hyperbolic Label Embeddings for Hierarchical Multi-label Classification",
+    author = "Chatterjee, Soumya and Maheshwari, Ayush and Ramakrishnan, Ganesh and Jagaralpudi, Saketha Nath",
+    booktitle = "Proceedings of the 16th Conference of the European Chapter of the Association for Computational Linguistics: Main Volume",
+    year = "2021",
+    publisher = "Association for Computational Linguistics",
+    url = "https://www.aclweb.org/anthology/2021.eacl-main.247",
+    pages = "2829--2841",
 }
 ```
